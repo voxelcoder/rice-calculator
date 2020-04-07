@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 # This little program takes your input on what type of rice, in which device and how much you want too cook.
 # It then calculates the ammount of water you need! It also shows you neat little infos depending on what
-# variety you cook! This program could also be extended to do the same, but for pasta!
+# variety you cook!
 #
 # Authors: Velican Akcakaya and Nicklas Reincke, 6th of April 2020.
 
