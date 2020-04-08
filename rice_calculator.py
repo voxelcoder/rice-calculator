@@ -3,9 +3,11 @@ from os import path
 from tabulate import tabulate
 # from tkinter import *
 
-# This little program takes your input on what type of rice, in which device and how much you want too cook.
-# It then calculates the amount of water you need! It also shows you neat little infos depending on what
-# variety you cook!
+# This little program takes your input on what type of rice,
+# in which device and how much you want too cook.
+# It then calculates the amount of water you need!
+# It also shows you neat little infos,
+# depending on what variety you cook!
 #
 # Authors: Velican Akcakaya and Nicklas Reincke, 6th of April 2020.
 
@@ -100,8 +102,9 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
     def start(self):
         print("Welcome to RiceCalculator™!\n")
         self.show_all_rice_types()
-        rice_type_id = input("""Here's a list of the most common rice varieties.
-Just select the one you want to cook!\n""")
+        rice_type_id = input(
+            "Here's a list of the most common rice varieties."
+            "Just select the one you want to cook!\n")
 
         selected_rice_type = self.select_one_rice_type(int(rice_type_id))
         print(f"You decided to use this type of rice: {selected_rice_type}")
@@ -114,8 +117,8 @@ Just select the one you want to cook!\n""")
         print(f"You decided to use this device: {device_type_name}")
 
         steps_to_take = self.calculate_steps(rice_type_id, cooking_device_id, rice_amount)
-        print(f"""Thanks a lot!
-Here are the steps you need to take: \n\n\n{steps_to_take}""")
+        print(f"Thanks a lot!"
+              f"Here are the steps you need to take: \n\n\n{steps_to_take}")
 
 
 rice_calculator = RiceCalculator()
