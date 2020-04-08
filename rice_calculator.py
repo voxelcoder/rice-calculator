@@ -39,8 +39,6 @@ class RiceCalculator:
         cursor = self.connection.cursor()
         cursor.execute("SELECT id, type FROM rice_types")
         return cursor.fetchall()
-        # headers = ["NUMBER", "RICE TYPE"]
-        # return tabulate(rice_types, headers, tablefmt="fancy_grid")
 
     def select_one_rice_type(self, rice_type_id: int) -> str:
         cursor = self.connection.cursor()
@@ -90,7 +88,7 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
                  f"{device_name}.\n")
 
         if info_text is not None:
-            steps += f"\n\nNOTE: {info_text}"
+            steps += f"\nNOTE: {info_text}"
 
         return steps
 
@@ -103,7 +101,6 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
 
         rice_types = self.get_all_rice_types()
 
-        print(rice_types)
         rice_type_names = [rice_type[1] for rice_type in rice_types]
 
         chosen_rice_type_name = questionary.select(
