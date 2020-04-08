@@ -38,8 +38,7 @@ class RiceCalculator:
     def get_all_rice_types(self):
         cursor = self.connection.cursor()
         cursor.execute("SELECT id, type FROM rice_types")
-        all_rice_types = cursor.fetchall()
-        return all_rice_types
+        return cursor.fetchall()
         # headers = ["NUMBER", "RICE TYPE"]
         # return tabulate(rice_types, headers, tablefmt="fancy_grid")
 
