@@ -92,7 +92,7 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
                  f"{liquid_amount}ml of "
                  f"{liquid_name} for "
                  f"{cooking_time} minutes in your "
-                 f"{device_name}")
+                 f"{device_name}.")
 
         if info_text is not None:
             steps += f"\n\nNOTE: {info_text}"
