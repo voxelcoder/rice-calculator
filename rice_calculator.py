@@ -3,6 +3,13 @@ from os import path
 import questionary
 
 
+def dict_factory(cursor, row):
+    dictionary = {}
+    for index, column in enumerate(cursor.description):
+        dictionary[column[0]] = row[index]
+    return dictionary
+
+
 class RiceCalculator:
 
     def __init__(self):
@@ -22,6 +29,8 @@ class RiceCalculator:
 
         if self.connection is None:
             self.connection = sqlite3.connect(self.database_file_name)
+
+        self.connection.row_factory = dict_factory
 
     def disconnect(self):
         if self.connection is not None:
@@ -45,14 +54,14 @@ class RiceCalculator:
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT type FROM rice_types WHERE id = {rice_type_id}")
         rice_type = cursor.fetchone()
-        return rice_type[0]
+        return rice_type["type"]
 
     def get_all_cooking_devices(self, rice_type_id: int):
         """Gets all usable cooking devices from the device_types table."""
         cursor = self.connection.cursor()
         cursor.execute(f"""SELECT
-  dt.id,
-  dt.type
+  dt.id AS id,
+  dt.type AS type
 FROM
   device_types dt
   JOIN rice_type_to_device_type rttdt ON rttdt.device_type_id = dt.id
@@ -72,7 +81,7 @@ WHERE rttdt.rice_type_id = {rice_type_id}
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT type FROM device_types WHERE id = {cooking_device_id}")
         device_type = cursor.fetchone()
-        return device_type[0]
+        return device_type["type"]
 
     def calculate_steps(self, rice_type_id, cooking_device_id, rice_amount):
         """"Joins multiple tables, gets a specific combination of parameters,
@@ -86,12 +95,12 @@ WHERE rttdt.rice_type_id = {rice_type_id}
         """
         cursor = self.connection.cursor()
         cursor.execute(f"""SELECT
-  rt.type,
-  dt.type,
-  lt.type,
-  rt.liquid_ratio,
-  rttdt.cooking_time,
-  rt.info_text
+  rt.type AS rice_type,
+  dt.type AS device_type,
+  lt.type AS liquid_type,
+  rt.liquid_ratio AS liquid_ratio,
+  rttdt.cooking_time AS cooking_time,
+  rt.info_text AS info_text
 FROM
   rice_types rt
   JOIN rice_type_to_device_type rttdt ON rt.id = rttdt.rice_type_id
@@ -100,11 +109,13 @@ FROM
 WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
 
         calc_step_list = cursor.fetchone()
-        rice_name, device_name, liquid_name, liquid_ratio, cooking_time, info_text = calc_step_list
 
-        liquid_amount = int(rice_amount) * liquid_ratio
-        liquid_name = liquid_name.lower()
-        device_name = device_name.lower()
+        liquid_amount = int(rice_amount) * calc_step_list["liquid_ratio"]
+        rice_name = calc_step_list["rice_type"].lower()
+        liquid_name = calc_step_list["liquid_type"].lower()
+        device_name = calc_step_list["device_type"].lower()
+        cooking_time = calc_step_list["cooking_time"]
+        info_text = calc_step_list["info_text"]
 
         steps = (f"Take {rice_amount}g of "
                  f"{rice_name} Rice and cook it in "
@@ -137,7 +148,7 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
 
         rice_types = self.get_all_rice_types()
 
-        rice_type_names = [rice_type[1] for rice_type in rice_types]
+        rice_type_names = [rice_type["type"] for rice_type in rice_types]
 
         chosen_rice_type_name = questionary.select(
             rice_selection_text,
@@ -148,9 +159,9 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         rice_type_name = None
 
         for rice_type in rice_types:
-            if chosen_rice_type_name is rice_type[1]:
-                rice_type_id = rice_type[0]
-                rice_type_name = rice_type[1]
+            if chosen_rice_type_name is rice_type["type"]:
+                rice_type_id = rice_type["id"]
+                rice_type_name = rice_type["type"]
 
         return rice_type_id, rice_type_name
 
@@ -179,7 +190,7 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         Selected device type's ID as an int and name as a string in a tuple.
         """
         device_types = self.get_all_cooking_devices(rice_type_id)
-        device_type_names = [device_type[1] for device_type in device_types]
+        device_type_names = [device_type["type"] for device_type in device_types]
 
         device_selection_text = "Great! Now, what usable device do you wan't too cook it in?\n"
         chosen_device_type_name = questionary.select(
@@ -191,9 +202,9 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         cooking_device_name = None
 
         for device_type in device_types:
-            if chosen_device_type_name is device_type[1]:
-                cooking_device_id = device_type[0]
-                cooking_device_name = device_type[1]
+            if chosen_device_type_name is device_type["type"]:
+                cooking_device_id = device_type["id"]
+                cooking_device_name = device_type["type"]
 
         return cooking_device_id, cooking_device_name
 
