@@ -2,14 +2,6 @@ import sqlite3
 from os import path
 import questionary
 
-# This little program takes your input on what type of rice,
-# in which device and how much you want too cook.
-# It then calculates the amount of water you need!
-# It also shows you neat little infos,
-# depending on what variety you cook!
-#
-# Authors: Velican Akcakaya and Nicklas Reincke, 6th of April 2020.
-
 
 class RiceCalculator:
 
@@ -36,28 +28,55 @@ class RiceCalculator:
             self.connection.close()
 
     def get_all_rice_types(self):
+        """Gets all rice types from the rice_types table."""
         cursor = self.connection.cursor()
         cursor.execute("SELECT id, type FROM rice_types")
         return cursor.fetchall()
 
     def select_one_rice_type(self, rice_type_id: int) -> str:
+        """"Selects a specific type of rice.
+
+        PARAMETERS:
+        rice_type_id as an int
+
+        RETURNS:
+        Corresponding rice type name to the ID as a string.
+        """
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT type FROM rice_types WHERE id = {rice_type_id}")
         rice_type = cursor.fetchone()
         return rice_type[0]
 
-    def show_all_cooking_devices(self):
+    def get_all_cooking_devices(self):
+        """Gets all cooking devices from the device_types table."""
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT id, type FROM device_types")
         return cursor.fetchall()
 
-    def select_one_cooking_device(self, cooking_device_id):
+    def select_one_cooking_device(self, cooking_device_id: int) -> str:
+        """"Selects a specific cooking device.
+
+        PARAMETERS:
+        cooking_device_id as an int
+
+        RETURNS:
+        Corresponding device name to the ID as a string.
+        """
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT type FROM device_types WHERE id = {cooking_device_id}")
         device_type = cursor.fetchone()
         return device_type[0]
 
     def calculate_steps(self, rice_type_id, cooking_device_id, rice_amount):
+        """"Joins multiple tables, gets a specific combination of parameters,
+        calculates liquid_amount and puts everything together in a string.
+
+        PARAMETERS:
+        rice_type_id, cooking_device_id and rice_amount
+
+        RETURNS:
+        A string containing instructions for the user to cook their rice.
+        """
         cursor = self.connection.cursor()
         cursor.execute(f"""SELECT
   rt.type,
@@ -92,9 +111,19 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
 
         return steps
 
-    def start(self):
+    def greet_user(self):
+        """Greets the user when starting the program."""
         print("Welcome to RiceCalculator™!\n")
 
+    def rice_selection(self):
+        """"Draws the rice-selection screen for the user.
+
+        PARAMETERS:
+        None
+
+        RETURNS:
+        Selected rice type's ID as an int and name as a string in a tuple.
+        """
         rice_selection_text = (
             "Here's a list of the most common rice varieties.\n"
             " Just select the one you want to cook!\n")
@@ -109,37 +138,84 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         ).ask()
 
         rice_type_id = None
+        rice_type_name = None
 
         for rice_type in rice_types:
             if chosen_rice_type_name is rice_type[1]:
                 rice_type_id = rice_type[0]
+                rice_type_name = rice_type[1]
 
-        selected_rice_type = self.select_one_rice_type(int(rice_type_id))
+        return rice_type_id, rice_type_name
+
+    def print_selected_rice_type(self, selected_rice_type: str):
+        """Prints out the selected type of rice."""
         print(f"You decided to use this type of rice: {selected_rice_type}\n")
 
-        rice_amount = int(questionary.text("Thank you! Now tell me how much you want to cook in grams\n").ask())
+    def get_rice_amount(self) -> int:
+        """"Asks the user how much rice they want to cook.
 
-        device_types = self.show_all_cooking_devices()
+        PARAMETERS:
+        None
+
+        RETURNS:
+        Amount of rice wanted as an int.
+        """
+        return int(questionary.text("Thank you! Now tell me how much you want to cook in grams\n").ask())
+
+    def device_selection(self):
+        """"Draws the device-selection screen for the user.
+
+        PARAMETERS:
+        None
+
+        RETURNS:
+        Selected device type's ID as an int and name as a string in a tuple.
+        """
+        device_types = self.get_all_cooking_devices()
         device_type_names = [device_type[1] for device_type in device_types]
 
         device_selection_text = "Great! Now, what do you wan't too cook it in?\n"
-        chosen_device_type_name =  questionary.select(
+        chosen_device_type_name = questionary.select(
             device_selection_text,
             choices=device_type_names
         ).ask()
 
         cooking_device_id = None
+        cooking_device_name = None
 
         for device_type in device_types:
             if chosen_device_type_name is device_type[1]:
                 cooking_device_id = device_type[0]
+                cooking_device_name = device_type[1]
 
-        device_type_name = self.select_one_cooking_device(cooking_device_id)
-        print(f"You decided to use this device: {device_type_name}")
+        return cooking_device_id, cooking_device_name
 
-        steps_to_take = self.calculate_steps(rice_type_id, cooking_device_id, rice_amount)
-        print(f"Thanks a lot!"
+    def print_selected_device_type(self, selected_device_type: str):
+        """Prints out the selected type of rice."""
+        print(f"You decided to use this device: {selected_device_type}")
+
+    def return_final_steps(self, selected_rice_type_id: int, selected_device_type: int, rice_amount: int):
+        """"Draws the device-selection screen for the user.
+
+        PARAMETERS:
+        selected_rice_type_id -> int, selected_device_type -> int, rice_amount -> int
+
+        RETURNS:
+        A print statement with the return string of calculate_steps()
+        """
+        steps_to_take = self.calculate_steps(selected_rice_type_id, selected_device_type, rice_amount)
+        print(f"Thanks a lot! "
               f"Here are the steps you need to take: \n\n\n{steps_to_take}")
+
+    def start(self):
+        """Starts the program."""
+        self.greet_user()
+        selected_rice_type = self.rice_selection()
+        self.print_selected_rice_type(selected_rice_type[1])
+        rice_amount = self.get_rice_amount()
+        selected_device_type = self.device_selection()
+        self.print_selected_device_type(selected_device_type[1])
+        self.return_final_steps(selected_rice_type[0], selected_device_type[0], rice_amount)
 
 
 rice_calculator = RiceCalculator()
