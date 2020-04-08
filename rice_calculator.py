@@ -1,6 +1,5 @@
 import sqlite3
 from os import path
-from tabulate import tabulate
 import questionary
 
 # This little program takes your input on what type of rice,
