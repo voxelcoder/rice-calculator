@@ -160,7 +160,11 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         RETURNS:
         Amount of rice wanted as an int.
         """
-        return int(questionary.text("Thank you! Now tell me how much you want to cook in grams\n").ask())
+        try:
+            return int(questionary.text("Thank you! Now tell me how much you want to cook in grams\n").ask())
+        except Exception:
+            print("Please input a number (without decimal points!)")
+            return self.get_rice_amount()
 
     def device_selection(self):
         """"Draws the device-selection screen for the user.
