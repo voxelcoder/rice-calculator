@@ -111,7 +111,7 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         calc_step_list = cursor.fetchone()
 
         liquid_amount = int(rice_amount) * calc_step_list["liquid_ratio"]
-        rice_name = calc_step_list["rice_type"].lower()
+        rice_name = calc_step_list["rice_type"]
         liquid_name = calc_step_list["liquid_type"].lower()
         device_name = calc_step_list["device_type"].lower()
         cooking_time = calc_step_list["cooking_time"]
