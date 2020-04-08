@@ -47,10 +47,17 @@ class RiceCalculator:
         rice_type = cursor.fetchone()
         return rice_type[0]
 
-    def get_all_cooking_devices(self):
-        """Gets all cooking devices from the device_types table."""
+    def get_all_cooking_devices(self, rice_type_id: int):
+        """Gets all usable cooking devices from the device_types table."""
         cursor = self.connection.cursor()
-        cursor.execute(f"SELECT id, type FROM device_types")
+        cursor.execute(f"""SELECT
+  dt.id,
+  dt.type
+FROM
+  device_types dt
+  JOIN rice_type_to_device_type rttdt ON rttdt.device_type_id = dt.id
+WHERE rttdt.rice_type_id = {rice_type_id}
+""")
         return cursor.fetchall()
 
     def select_one_cooking_device(self, cooking_device_id: int) -> str:
@@ -107,7 +114,7 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
                  f"{device_name}.\n")
 
         if info_text is not None:
-            steps += f"\nNOTE: {info_text}"
+            steps += f"\nNOTE: {info_text}\n"
 
         return steps
 
@@ -147,10 +154,6 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
 
         return rice_type_id, rice_type_name
 
-    def print_selected_rice_type(self, selected_rice_type: str):
-        """Prints out the selected type of rice."""
-        print(f"You decided to use this type of rice: {selected_rice_type}\n")
-
     def get_rice_amount(self) -> int:
         """"Asks the user how much rice they want to cook.
 
@@ -166,7 +169,7 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
             print("Please input a number (without decimal points!)")
             return self.get_rice_amount()
 
-    def device_selection(self):
+    def device_selection(self, rice_type_id: int):
         """"Draws the device-selection screen for the user.
 
         PARAMETERS:
@@ -175,10 +178,10 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         RETURNS:
         Selected device type's ID as an int and name as a string in a tuple.
         """
-        device_types = self.get_all_cooking_devices()
+        device_types = self.get_all_cooking_devices(rice_type_id)
         device_type_names = [device_type[1] for device_type in device_types]
 
-        device_selection_text = "Great! Now, what do you wan't too cook it in?\n"
+        device_selection_text = "Great! Now, what usable device do you wan't too cook it in?\n"
         chosen_device_type_name = questionary.select(
             device_selection_text,
             choices=device_type_names
@@ -193,10 +196,6 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
                 cooking_device_name = device_type[1]
 
         return cooking_device_id, cooking_device_name
-
-    def print_selected_device_type(self, selected_device_type: str):
-        """Prints out the selected type of rice."""
-        print(f"You decided to use this device: {selected_device_type}")
 
     def return_final_steps(self, selected_rice_type_id: int, selected_device_type: int, rice_amount: int):
         """"Draws the device-selection screen for the user.
@@ -215,10 +214,8 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         """Starts the program."""
         self.greet_user()
         selected_rice_type = self.rice_selection()
-        self.print_selected_rice_type(selected_rice_type[1])
         rice_amount = self.get_rice_amount()
-        selected_device_type = self.device_selection()
-        self.print_selected_device_type(selected_device_type[1])
+        selected_device_type = self.device_selection(selected_rice_type[0])
         self.return_final_steps(selected_rice_type[0], selected_device_type[0], rice_amount)
 
 
