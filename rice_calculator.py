@@ -52,8 +52,7 @@ class RiceCalculator:
     def show_all_cooking_devices(self):
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT id, type FROM device_types")
-        device_types = cursor.fetchall()
-        return device_types
+        return cursor.fetchall()
 
     def select_one_cooking_device(self, cooking_device_id):
         cursor = self.connection.cursor()
