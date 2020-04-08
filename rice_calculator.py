@@ -208,7 +208,8 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         """
         steps_to_take = self.calculate_steps(selected_rice_type_id, selected_device_type, rice_amount)
         print(f"Thanks a lot! "
-              f"Here are the steps you need to take: \n\n\n{steps_to_take}")
+              f"Here are the steps you need to take: \n\n\n{steps_to_take}\n"
+              f"Have a rice meal!\n")
 
     def start(self):
         """Starts the program."""
