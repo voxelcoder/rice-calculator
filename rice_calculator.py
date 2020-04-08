@@ -1,6 +1,6 @@
 import sqlite3
 from os import path
-from tabulate import tabulate
+import questionary
 
 # This little program takes your input on what type of rice,
 # in which device and how much you want too cook.
@@ -35,13 +35,10 @@ class RiceCalculator:
         if self.connection is not None:
             self.connection.close()
 
-    def show_all_rice_types(self):
+    def get_all_rice_types(self):
         cursor = self.connection.cursor()
         cursor.execute("SELECT id, type FROM rice_types")
-        rice_types = list(cursor.fetchall())
-
-        headers = ["NUMBER", "RICE TYPE"]
-        print(tabulate(rice_types, headers, tablefmt="fancy_grid"))
+        return cursor.fetchall()
 
     def select_one_rice_type(self, rice_type_id: int) -> str:
         cursor = self.connection.cursor()
@@ -52,10 +49,7 @@ class RiceCalculator:
     def show_all_cooking_devices(self):
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT id, type FROM device_types")
-        device_types = list(cursor.fetchall())
-
-        headers = ["NUMBER", "DEVICE"]
-        print(tabulate(device_types, headers, tablefmt="fancy_grid"))
+        return cursor.fetchall()
 
     def select_one_cooking_device(self, cooking_device_id):
         cursor = self.connection.cursor()
@@ -91,27 +85,55 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
                  f"{liquid_amount}ml of "
                  f"{liquid_name} for "
                  f"{cooking_time} minutes in your "
-                 f"{device_name}.")
+                 f"{device_name}.\n")
 
         if info_text is not None:
-            steps += f"\n\nNOTE: {info_text}"
+            steps += f"\nNOTE: {info_text}"
 
         return steps
 
     def start(self):
         print("Welcome to RiceCalculator™!\n")
-        self.show_all_rice_types()
-        rice_type_id = input(
-            "Here's a list of the most common rice varieties."
-            "Just select the one you want to cook!\n")
+
+        rice_selection_text = (
+            "Here's a list of the most common rice varieties.\n"
+            " Just select the one you want to cook!\n")
+
+        rice_types = self.get_all_rice_types()
+
+        rice_type_names = [rice_type[1] for rice_type in rice_types]
+
+        chosen_rice_type_name = questionary.select(
+            rice_selection_text,
+            choices=rice_type_names
+        ).ask()
+
+        rice_type_id = None
+
+        for rice_type in rice_types:
+            if chosen_rice_type_name is rice_type[1]:
+                rice_type_id = rice_type[0]
 
         selected_rice_type = self.select_one_rice_type(int(rice_type_id))
-        print(f"You decided to use this type of rice: {selected_rice_type}")
+        print(f"You decided to use this type of rice: {selected_rice_type}\n")
 
-        rice_amount = input("Thank you! Now tell me how much you want to cook in grams\n")
+        rice_amount = int(questionary.text("Thank you! Now tell me how much you want to cook in grams\n").ask())
 
-        self.show_all_cooking_devices()
-        cooking_device_id = input("Great! Now, what do you wan't too cook it in?\n")
+        device_types = self.show_all_cooking_devices()
+        device_type_names = [device_type[1] for device_type in device_types]
+
+        device_selection_text = "Great! Now, what do you wan't too cook it in?\n"
+        chosen_device_type_name =  questionary.select(
+            device_selection_text,
+            choices=device_type_names
+        ).ask()
+
+        cooking_device_id = None
+
+        for device_type in device_types:
+            if chosen_device_type_name is device_type[1]:
+                cooking_device_id = device_type[0]
+
         device_type_name = self.select_one_cooking_device(cooking_device_id)
         print(f"You decided to use this device: {device_type_name}")
 

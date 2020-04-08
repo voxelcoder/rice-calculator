@@ -11,6 +11,6 @@ Authors: Velican Akcakaya and Nicklas Reincke, 6th of April 2020.
 ## Usage
 
 ```bash
-$ pip3 install tabulate
+$ pip3 install questionary
 $ python3 ./rice_calculator.py
 ```
