@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png">
+</p>
+
 # Rice-Calculator
 
 This little program takes your input on what type of rice,
