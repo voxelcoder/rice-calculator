@@ -1,7 +1,6 @@
 import sqlite3
 from os import path
 from tabulate import tabulate
-# from tkinter import *
 
 # This little program takes your input on what type of rice,
 # in which device and how much you want too cook.
