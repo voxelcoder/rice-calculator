@@ -34,8 +34,7 @@ class RiceCalculator:
         return cursor.fetchall()
 
     def select_one_rice_type(self, rice_type_id: int) -> str:
-        """"
-        Selects a specific type of rice.
+        """"Selects a specific type of rice.
 
         PARAMETERS:
         rice_type_id as an int
@@ -55,8 +54,7 @@ class RiceCalculator:
         return cursor.fetchall()
 
     def select_one_cooking_device(self, cooking_device_id: int) -> str:
-        """"
-        Selects a specific cooking device.
+        """"Selects a specific cooking device.
 
         PARAMETERS:
         cooking_device_id as an int
@@ -70,8 +68,7 @@ class RiceCalculator:
         return device_type[0]
 
     def calculate_steps(self, rice_type_id, cooking_device_id, rice_amount):
-        """"
-        Joins multiple tables, gets a specific combination of parameters,
+        """"Joins multiple tables, gets a specific combination of parameters,
         calculates liquid_amount and puts everything together in a string.
 
         PARAMETERS:
@@ -119,8 +116,7 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         print("Welcome to RiceCalculator™!\n")
 
     def rice_selection(self):
-        """"
-        Draws the rice-selection screen for the user.
+        """"Draws the rice-selection screen for the user.
 
         PARAMETERS:
         None
@@ -156,8 +152,7 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         print(f"You decided to use this type of rice: {selected_rice_type}\n")
 
     def get_rice_amount(self) -> int:
-        """"
-        Asks the user how much rice they want to cook.
+        """"Asks the user how much rice they want to cook.
 
         PARAMETERS:
         None
@@ -168,8 +163,7 @@ WHERE rt.id = {rice_type_id} AND dt.id = {cooking_device_id};""")
         return int(questionary.text("Thank you! Now tell me how much you want to cook in grams\n").ask())
 
     def device_selection(self):
-        """"
-        Draws the device-selection screen for the user.
+        """"Draws the device-selection screen for the user.
 
         PARAMETERS:
         None
